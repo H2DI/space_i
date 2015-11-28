@@ -10,3 +10,6 @@ Une fois qu'on a appris ces trois trucs, on cherche à maximiser le score avec e
 Avec une méthode comme ça on divise l'apprentissage, c'est un peu supervisé donc c'est pas optimal; mais c'est très facile à faire.
 
 Une autre méthode serait juste de maximiser le score en mettant une pénalité sur notre mort. Je sais pas si ça peut bien marcher avec un simple process gaussien mais on peut tenter. Autrement, faudrait peut être utiliser des réseaux de neurone
+
+
+YEAH C4EST D BAR
