@@ -12,7 +12,7 @@ import random as rd
 
 class Mechant:
     
-    m_size = 0.05 # le méchant est carré de côté j_size
+    m_size = 0.01 # le méchant est carré de côté j_size
     
     def __init__(self):
         self.position = self._init_position()
