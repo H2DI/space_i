@@ -75,9 +75,7 @@ class Jeu(Tk):
             self.missiles.append(SI.Missile(self.joueur.position, direction=1))
                 
     def update_all(self,autorepeat):
-        print "false"
         self.afficher()
-        #print len(self.missiles)
         self.implement_action()
         r = rd.random()
         if (r < 0.04):
@@ -153,4 +151,4 @@ class Jeu(Tk):
         self.canvas.create_rectangle(x+c, y+c, x-c, y-c, fill="white", tag="joueur")
 
 print "Début de la partie"
-#Jeu().mainloop()
+Jeu().mainloop()
