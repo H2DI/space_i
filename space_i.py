@@ -7,7 +7,7 @@ Space invader
 @author: h
 """
 
-import Tkinter as tk
+#import Tkinter as tk
 import random as rd
 
 class Mechant:

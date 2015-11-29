@@ -24,7 +24,7 @@ def convert_coordinates((x, y)): # Convertit les coordonnées du jeu pour les r�
 
 class Jeu(Tk):
     
-    delta_t = 20 #Durée d'une frame, en ms
+    delta_t = 20 # Durée d'une frame, en ms
     
     def __init__(self, autorepeat=True):
         Tk.__init__(self)
@@ -41,16 +41,16 @@ class Jeu(Tk):
         self.bind("<Key>", self.get_action)
         self.canvas.create_text(T-50, T-50, text="Vies : "+str(self.joueur.vies), fill="white", tag="vie")
         self.canvas.create_text(50, T-50, text="Score : "+str(self.score), fill="white", tag="score")
-        if autorepeat:
-            self.update_all(autorepeat)
-    
+        self.autorepeat = autorepeat
+        self.update_all()        
+        
     def restart(self, event):
         print "Restart"
         self.joueur.reinitialiser()
         self.mechants = []
         self.missiles = []
         self.score = 0
-        self.instruction='m'
+        self.instruction = 'm'
         self.dead_screen = False
         self.canvas.config(bg="black")
         self.canvas.pack()
@@ -73,7 +73,7 @@ class Jeu(Tk):
             self.instruction='m'
             self.missiles.append(SI.Missile(self.joueur.position, direction=1))
                 
-    def update_all(self, autorepeat=True):
+    def update_all(self):
         self.afficher()
         #print len(self.missiles)
         self.implement_action()
@@ -105,9 +105,11 @@ class Jeu(Tk):
             self.mechants.pop(elt)
         for elt in missiles_to_delete:
             self.missiles.pop(elt)
-        if autorepeat:
-            print "true"
-            self.canvas.after(Jeu.delta_t, self.update_all(autorepeat=True))
+        print self.autorepeat
+        if self.autorepeat:
+            print self.autorepeat
+            print Jeu.delta_t
+            self.canvas.after(Jeu.delta_t, self.update_all)
         else:
             return self.joueur, self.mechants, self.missiles, self.vies
     
@@ -124,8 +126,7 @@ class Jeu(Tk):
             self.canvas.delete("missiles")
             self.canvas.delete("mechants")
             self.canvas.delete("joueur")
-            player = self.joueur
-            self.afficher_joueur(player)
+            self.afficher_joueur(self.joueur)
             for mechant in self.mechants:
                 self.afficher_mechant(mechant)
             for missile in self.missiles:
@@ -150,4 +151,4 @@ class Jeu(Tk):
         #print (x+c),(y+c),(y-c),(x-c)
         self.canvas.create_rectangle(x+c, y+c, x-c, y-c, fill="white", tag="joueur")
 
-Jeu().mainloop()
+Jeu(autorepeat=True).mainloop()

@@ -13,6 +13,6 @@ import main_jeu as MJ
 
 
 
-jeu = MJ.Jeu(autorepeat=True)
+MJ.Jeu(autorepeat=True).mainloop()
 print "started"
 #jeu.update_all(autorepeat=True)
