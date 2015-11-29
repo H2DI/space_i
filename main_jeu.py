@@ -40,7 +40,7 @@ class Jeu(Tk):
         self.canvas.pack()
         self.bind("<Key>", self.get_action)
         self.canvas.create_text(T-50 ,T-50, text="Vies : "+str(self.joueur.vies), fill="white", tag="vie")
-        self.canvas.create_text(50 , T - 50, text="Score : "+str(self.score), fill="white", tag="score")        
+        self.canvas.create_text(50 , T-50, text="Score : "+str(self.score), fill="white", tag="score")        
         self.update_all()
     
     def restart(self, event):
@@ -66,9 +66,9 @@ class Jeu(Tk):
     def implement_action(self):
         print self.instruction
         if self.instruction == 'd':
-            self.joueur.bouger(1,Jeu.delta_t)
+            self.joueur.bouger(1, Jeu.delta_t)
         elif self.instruction == 'q':
-            self.joueur.bouger(-1,Jeu.delta_t)
+            self.joueur.bouger(-1, Jeu.delta_t)
         elif self.instruction == 'z':
             self.instruction='m'
             self.missiles.append(SI.Missile(self.joueur.position, direction=1))
