@@ -41,7 +41,7 @@ class Jeu(Tk):
         self.bind("<Key>", self.get_action)
         self.canvas.create_text(T-50 ,T-50, text="Vies : "+str(self.joueur.vies), fill="white", tag="vie")
         self.canvas.create_text(50 , T - 50, text="Score : "+str(self.score), fill="white", tag="score")        
-        self.update_all()
+        self.update_all(autorepeat=True)
     
     def restart(self, event):
         print "Restart"
@@ -73,12 +73,12 @@ class Jeu(Tk):
             self.instruction='m'
             self.missiles.append(SI.Missile(self.joueur.position, direction=1))
                 
-    def update_all(self):
+    def update_all(self,autorepeat=True):
         self.afficher()
         #print len(self.missiles)
         self.implement_action()
         r = rd.random()
-        if (r < 0.1):
+        if (r < 0.04):
             self.mechants.append(SI.Mechant())
         mechants_to_delete = []
         missiles_to_delete = []
@@ -93,7 +93,7 @@ class Jeu(Tk):
         for i, mechant in enumerate(self.mechants):
             mechant.bouger(Jeu.delta_t)
             r = rd.random()
-            if (r<0.01):
+            if (r<0.001):
                 self.missiles.append(SI.Missile(mechant.position, direction=-1))
             for j, missile in enumerate(self.missiles):
                 if missile.detecter_collision_mechant(mechant):
@@ -105,8 +105,11 @@ class Jeu(Tk):
             self.mechants.pop(elt)
         for elt in missiles_to_delete:
             self.missiles.pop(elt)
-        self.canvas.after(Jeu.delta_t, self.update_all)
-        
+        if autorepeat:
+            self.canvas.after(Jeu.delta_t, self.update_all(autorepeat=True))
+        else:
+            return self.joueur,self.mechants,self.missiles,self.vies
+    
     def afficher(self):
         if not(self.joueur.alive):
             if not(self.dead_screen): # S'active à l'instant où on meurt
