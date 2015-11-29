@@ -29,13 +29,13 @@ class Mechant:
         else:
             return - 0.03 / 6, 0
         
-    def bouger(self): # change la vitesse si au bord
+    def bouger(self , delta_t): # change la vitesse si au bord
         x, y = self.position
         vx, vy = self.vitesse
         if x < Mechant.m_size / 2 or x > 1 - Mechant.m_size / 2:
             self.vitesse = -vx, vy
         vx, vy = self.vitesse
-        self.position = x + vx, y + vy
+        self.position = x + vx * delta_t / 50, y + vy * delta_t / 50
         return
     
     def tirer(self):
@@ -49,17 +49,17 @@ class Mechant:
 class Joueur:
     
     j_size = 0.05 # le joueur est carré de côté j_size
-    vitesse = 0.1 / 6    
+    vitesse = 0.1 / 6
     
     def __init__(self):
         self.position = 0.5, 0.1
         self.vies = 1 
         self.alive = True
     
-    def bouger(self, i):
+    def bouger(self, i, delta_t):
         x, y = self.position
         if -Joueur.j_size / 2 < x < 1 + Joueur.j_size / 2:
-            self.position = x + i * Joueur.vitesse, y
+            self.position = x + i * Joueur.vitesse * delta_t / 50, y
         elif -Joueur.j_size / 2 > x:
             self.position = 1., y
         elif x > 1 + Joueur.j_size / 2:  
@@ -101,9 +101,9 @@ class Missile:
         Missile(self.position, direction=1)
         return
     
-    def bouger(self):
+    def bouger(self, delta_t):
          x, y = self.position
-         self.position = x, y + self.vitesse
+         self.position = x, y + self.vitesse * delta_t / 50
     
     def out_of_bounds(self):
         x, y = self.position

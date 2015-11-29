@@ -24,6 +24,8 @@ def convert_coordinates((x, y)): # Convertit les coordonnées du jeu pour les r�
 
 class Jeu(Tk):
     
+    delta_t = 20 #Durée d'une frame, en ms
+    
     def __init__(self):
         Tk.__init__(self)
         print "Jeu créé"
@@ -65,14 +67,14 @@ class Jeu(Tk):
     def implement_action(self):
         print self.instruction
         if self.instruction == 'd':
-            self.joueur.bouger(1)
+            self.joueur.bouger(1,Jeu.delta_t)
         elif self.instruction == 'q':
-            self.joueur.bouger(-1)
+            self.joueur.bouger(-1,Jeu.delta_t)
         elif self.instruction == 'z':
             self.instruction='m'
             self.missiles.append(SI.Missile(self.joueur.position, direction=1))
                 
-    def update_all(self, refresh_time=50, once=False):
+    def update_all(self, once=False):
         self.afficher()
         #print len(self.missiles)
         self.implement_action()
@@ -82,7 +84,7 @@ class Jeu(Tk):
         mechants_to_delete = []
         missiles_to_delete = []
         for j, missile in enumerate(self.missiles):
-            missile.bouger()
+            missile.bouger(Jeu.delta_t)
             if missile.out_of_bounds():
                 missiles_to_delete.append(j)
             elif missile.detecter_collision_joueur(self.joueur):
@@ -90,7 +92,7 @@ class Jeu(Tk):
                 self.canvas.itemconfigure("vie", text="Vies : "+str(self.joueur.vies))
                 missiles_to_delete.append(j)
         for i, mechant in enumerate(self.mechants):
-            mechant.bouger()
+            mechant.bouger(Jeu.delta_t)
             r = rd.random()
             if (r<0.01):
                 self.missiles.append(SI.Missile(mechant.position, direction=-1))
@@ -105,7 +107,7 @@ class Jeu(Tk):
         for elt in missiles_to_delete:
             self.missiles.pop(elt)
         if not(once):
-            self.canvas.after(refresh_time, self.update_all)
+            self.canvas.after(Jeu.delta_t, self.update_all)
         
     def afficher(self):
         if not(self.joueur.alive):
