@@ -57,7 +57,6 @@ class Jeu(Tk):
         self.canvas.itemconfigure("vie", text="Vies : "+str(self.joueur.vies))
         self.canvas.itemconfigure("score", text="Score : "+str(self.score), fill="white")
         self.canvas.delete("dead")
-        self.update_all(refresh_time=50, once=True)
         
 
     def get_action(self, event):
@@ -74,7 +73,7 @@ class Jeu(Tk):
             self.instruction='m'
             self.missiles.append(SI.Missile(self.joueur.position, direction=1))
                 
-    def update_all(self, once=False):
+    def update_all(self):
         self.afficher()
         #print len(self.missiles)
         self.implement_action()
@@ -106,8 +105,7 @@ class Jeu(Tk):
             self.mechants.pop(elt)
         for elt in missiles_to_delete:
             self.missiles.pop(elt)
-        if not(once):
-            self.canvas.after(Jeu.delta_t, self.update_all)
+        self.canvas.after(Jeu.delta_t, self.update_all)
         
     def afficher(self):
         if not(self.joueur.alive):
