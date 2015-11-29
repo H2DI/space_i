@@ -26,7 +26,7 @@ class Jeu(Tk):
     
     delta_t = 20 #Durée d'une frame, en ms
     
-    def __init__(self):
+    def __init__(self,autorepeat=True):
         Tk.__init__(self)
         print "Jeu créé"
         self.joueur = SI.Joueur()
@@ -40,8 +40,9 @@ class Jeu(Tk):
         self.canvas.pack()
         self.bind("<Key>", self.get_action)
         self.canvas.create_text(T-50 ,T-50, text="Vies : "+str(self.joueur.vies), fill="white", tag="vie")
-        self.canvas.create_text(50 , T - 50, text="Score : "+str(self.score), fill="white", tag="score")        
-        self.update_all(autorepeat=True)
+        self.canvas.create_text(50 , T - 50, text="Score : "+str(self.score), fill="white", tag="score")
+        if autorepeat:
+            self.update_all(autorepeat)
     
     def restart(self, event):
         print "Restart"
@@ -73,7 +74,8 @@ class Jeu(Tk):
             self.instruction='m'
             self.missiles.append(SI.Missile(self.joueur.position, direction=1))
                 
-    def update_all(self,autorepeat=True):
+    def update_all(self,autorepeat):
+        print "false"
         self.afficher()
         #print len(self.missiles)
         self.implement_action()
@@ -106,6 +108,7 @@ class Jeu(Tk):
         for elt in missiles_to_delete:
             self.missiles.pop(elt)
         if autorepeat:
+            print "true"
             self.canvas.after(Jeu.delta_t, self.update_all(autorepeat=True))
         else:
             return self.joueur,self.mechants,self.missiles,self.vies
@@ -150,4 +153,4 @@ class Jeu(Tk):
         self.canvas.create_rectangle(x+c, y+c, x-c, y-c, fill="white", tag="joueur")
 
 print "Début de la partie"
-Jeu().mainloop()
+#Jeu().mainloop()
