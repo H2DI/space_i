@@ -5,13 +5,14 @@ Created on Fri Nov 27 14:58:26 2015
 Space invader
 
 @author: h
+
 """
 
-import Tkinter as tk
+from Tkinter import *
 import main_jeu as MJ
 
 
 
-jeu=MJ.Jeu(False)
+jeu = MJ.Jeu(autorepeat=True)
 print "started"
-jeu.update_all(True)
+#jeu.update_all(autorepeat=True)

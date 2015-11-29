@@ -26,7 +26,7 @@ class Jeu(Tk):
     
     delta_t = 20 #Durée d'une frame, en ms
     
-    def __init__(self,autorepeat=True):
+    def __init__(self, autorepeat=True):
         Tk.__init__(self)
         print "Jeu créé"
         self.joueur = SI.Joueur()
@@ -39,15 +39,14 @@ class Jeu(Tk):
         self.canvas = Canvas(self, width=T, height=T, bg="black")
         self.canvas.pack()
         self.bind("<Key>", self.get_action)
-        self.canvas.create_text(T-50 ,T-50, text="Vies : "+str(self.joueur.vies), fill="white", tag="vie")
-        self.canvas.create_text(50 , T - 50, text="Score : "+str(self.score), fill="white", tag="score")
+        self.canvas.create_text(T-50, T-50, text="Vies : "+str(self.joueur.vies), fill="white", tag="vie")
+        self.canvas.create_text(50, T-50, text="Score : "+str(self.score), fill="white", tag="score")
         if autorepeat:
             self.update_all(autorepeat)
     
     def restart(self, event):
         print "Restart"
-        del self.joueur
-        self.joueur = SI.Joueur()
+        self.joueur.reinitialiser()
         self.mechants = []
         self.missiles = []
         self.score = 0
@@ -67,15 +66,14 @@ class Jeu(Tk):
     def implement_action(self):
         print self.instruction
         if self.instruction == 'd':
-            self.joueur.bouger(1,Jeu.delta_t)
+            self.joueur.bouger(1, Jeu.delta_t)
         elif self.instruction == 'q':
-            self.joueur.bouger(-1,Jeu.delta_t)
+            self.joueur.bouger(-1, Jeu.delta_t)
         elif self.instruction == 'z':
             self.instruction='m'
             self.missiles.append(SI.Missile(self.joueur.position, direction=1))
                 
-    def update_all(self,autorepeat):
-        print "false"
+    def update_all(self, autorepeat=True):
         self.afficher()
         #print len(self.missiles)
         self.implement_action()
@@ -111,7 +109,7 @@ class Jeu(Tk):
             print "true"
             self.canvas.after(Jeu.delta_t, self.update_all(autorepeat=True))
         else:
-            return self.joueur,self.mechants,self.missiles,self.vies
+            return self.joueur, self.mechants, self.missiles, self.vies
     
     def afficher(self):
         if not(self.joueur.alive):
@@ -152,5 +150,4 @@ class Jeu(Tk):
         #print (x+c),(y+c),(y-c),(x-c)
         self.canvas.create_rectangle(x+c, y+c, x-c, y-c, fill="white", tag="joueur")
 
-print "Début de la partie"
-#Jeu().mainloop()
+Jeu().mainloop()

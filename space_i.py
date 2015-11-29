@@ -56,6 +56,11 @@ class Joueur:
         self.vies = 1 
         self.alive = True
     
+    def reinitialiser(self):
+        self.position = 0.5, 0.1
+        self.vies = 1 
+        self.alive = True
+    
     def bouger(self, i, delta_t):
         x, y = self.position
         if -Joueur.j_size / 2 < x < 1 + Joueur.j_size / 2:
