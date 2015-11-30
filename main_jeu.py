@@ -19,8 +19,12 @@ T = 600 # Taille de la fenêtre
 
 def convert_coordinates((x, y)): # Convertit les coordonnées du jeu pour les réajuster dans la fenêtre
     return T * x, T * (1 - y)
-    
-    
+
+def appartient(l,x):
+    for elt in l:
+        if elt==x:
+            return True
+    return False
 
 class Jeu(Tk):
     
@@ -99,8 +103,10 @@ class Jeu(Tk):
                 if missile.detecter_collision_mechant(mechant):
                     self.score += 1
                     self.canvas.itemconfigure("score", text="Score : "+str(self.score))
-                    mechants_to_delete = [i] + mechants_to_delete
-                    missiles_to_delete = [j] + missiles_to_delete
+                    if not(appartient(mechants_to_delete,i)):
+                        mechants_to_delete = [i] + mechants_to_delete
+                    if not(appartient(missiles_to_delete,j)):
+                        missiles_to_delete = [j] + missiles_to_delete
         for elt in mechants_to_delete:
             self.mechants.pop(elt)
         for elt in missiles_to_delete:
