@@ -48,17 +48,17 @@ class Mechant:
 
 class Joueur:
     
-    j_size = 0.05 # le joueur est carré de côté j_size
+    j_size = 0.01 # le joueur est carré de côté j_size 0.05
     vitesse = 0.1 / 6
     
     def __init__(self):
         self.position = 0.5, 0.1
-        self.vies = 1 
+        self.vies = 5
         self.alive = True
     
     def reinitialiser(self):
         self.position = 0.5, 0.1
-        self.vies = 1 
+        self.vies = 5
         self.alive = True
     
     def bouger(self, i, delta_t):

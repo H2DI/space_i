@@ -11,6 +11,7 @@ Space invader
 from Tkinter import *
 
 import random as rd
+from math import sqrt
 
 import space_i as SI
 
@@ -28,13 +29,14 @@ def appartient(l,x):
 
 class Jeu(Tk):
     
-    delta_t = 20 # Durée d'une frame, en ms
+    delta_t = 25 # Durée d'une frame, en ms
     
     def __init__(self, autorepeat=True):
         Tk.__init__(self)
         print "Jeu créé"
         self.joueur = SI.Joueur()
         self.mechants = []
+        self.temps=0
         self.missiles = []
         self.score = 0
         self.instruction='m'
@@ -42,13 +44,12 @@ class Jeu(Tk):
         self.frame = Frame(self, width=T, height=T)
         self.canvas = Canvas(self, width=T, height=T, bg="black")
         self.canvas.pack()
-        self.bind("<Key>", self.get_action)
         self.canvas.create_text(T-50, T-50, text="Vies : "+str(self.joueur.vies), fill="white", tag="vie")
         self.canvas.create_text(50, T-50, text="Score : "+str(self.score), fill="white", tag="score")
         self.autorepeat = autorepeat
         self.update_all()        
         
-    def restart(self, event):
+    def restart(self):
         print "Restart"
         self.joueur.reinitialiser()
         self.mechants = []
@@ -61,14 +62,10 @@ class Jeu(Tk):
         self.canvas.itemconfigure("vie", text="Vies : "+str(self.joueur.vies))
         self.canvas.itemconfigure("score", text="Score : "+str(self.score), fill="white")
         self.canvas.delete("dead")
-        
-
-    def get_action(self, event):
-        print "Moved or shot"
-        self.instruction = event.char
+    
         
     def implement_action(self):
-        print self.instruction
+        #print self.instruction
         if self.instruction == 'd':
             self.joueur.bouger(1, Jeu.delta_t)
         elif self.instruction == 'q':
@@ -77,12 +74,16 @@ class Jeu(Tk):
             self.instruction='m'
             self.missiles.append(SI.Missile(self.joueur.position, direction=1))
                 
-    def update_all(self):
+    def update_all(self,instruction='m'):
+        self.instruction=instruction
+        self.temps+=1
+        if not(self.joueur.alive):
+            return "Dead"
         self.afficher()
         #print len(self.missiles)
         self.implement_action()
         r = rd.random()
-        if (r < 0.04):
+        if (r < 0.04 and len(self.mechants)<100):
             self.mechants.append(SI.Mechant())
         mechants_to_delete = []
         missiles_to_delete = []
@@ -97,7 +98,7 @@ class Jeu(Tk):
         for i, mechant in enumerate(self.mechants):
             mechant.bouger(Jeu.delta_t)
             r = rd.random()
-            if (r<0.001):
+            if ((r<0.01*(1+sqrt(sqrt((self.temps/1000))))) and len(self.missiles)<100):
                 self.missiles.append(SI.Missile(mechant.position, direction=-1))
             for j, missile in enumerate(self.missiles):
                 if missile.detecter_collision_mechant(mechant):
@@ -117,7 +118,7 @@ class Jeu(Tk):
             print Jeu.delta_t
             self.canvas.after(Jeu.delta_t, self.update_all)
         else:
-            return self.joueur, self.mechants, self.missiles, self.vies
+            return self.joueur, self.mechants, self.missiles, self.joueur.vies, self.temps
     
     def afficher(self):
         if not(self.joueur.alive):
@@ -157,4 +158,4 @@ class Jeu(Tk):
         #print (x+c),(y+c),(y-c),(x-c)
         self.canvas.create_rectangle(x+c, y+c, x-c, y-c, fill="white", tag="joueur")
 
-Jeu(autorepeat=True).mainloop()
+#Jeu(autorepeat=True).mainloop()
