@@ -36,7 +36,7 @@ class Jeu(Tk):
         print "Jeu créé"
         self.joueur = SI.Joueur()
         self.mechants = []
-        self.temps=0
+        self.temps = 0
         self.missiles = []
         self.score = 0
         self.instruction='m'
@@ -45,7 +45,7 @@ class Jeu(Tk):
         self.canvas = Canvas(self, width=T, height=T, bg="black")
         self.canvas.pack()
         self.canvas.create_text(T-50, T-50, text="Vies : "+str(self.joueur.vies), fill="white", tag="vie")
-        self.canvas.create_text(50, T-50, text="Score : "+str(self.score), fill="white", tag="score")
+        self.canvas.create_text(100, T-50, text="Temps (score) : "+str(self.temps) + " ("+str(self.score) + ")", fill="white", tag="score")
         self.autorepeat = autorepeat
         self.update_all()        
         
@@ -55,12 +55,13 @@ class Jeu(Tk):
         self.mechants = []
         self.missiles = []
         self.score = 0
+        self.temps = 0
         self.instruction = 'm'
         self.dead_screen = False
         self.canvas.config(bg="black")
         self.canvas.pack()
         self.canvas.itemconfigure("vie", text="Vies : "+str(self.joueur.vies))
-        self.canvas.itemconfigure("score", text="Score : "+str(self.score), fill="white")
+        self.canvas.itemconfigure("score", text="Temps (score) : "+str(self.temps) + " ("+str(self.score) + ")", fill="white")
         self.canvas.delete("dead")
     
         
@@ -76,7 +77,8 @@ class Jeu(Tk):
                 
     def update_all(self,instruction='m'):
         self.instruction=instruction
-        self.temps+=1
+        self.temps += 1
+        self.canvas.itemconfigure("score", text="Temps (score) : "+str(self.temps / 10) + " ("+str(self.score) + ")")
         if not(self.joueur.alive):
             return "Dead"
         self.afficher()
@@ -103,7 +105,6 @@ class Jeu(Tk):
             for j, missile in enumerate(self.missiles):
                 if missile.detecter_collision_mechant(mechant):
                     self.score += 1
-                    self.canvas.itemconfigure("score", text="Score : "+str(self.score))
                     if not(appartient(mechants_to_delete,i)):
                         mechants_to_delete = [i] + mechants_to_delete
                     if not(appartient(missiles_to_delete,j)):

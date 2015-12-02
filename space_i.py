@@ -48,7 +48,7 @@ class Mechant:
 
 class Joueur:
     
-    j_size = 0.01 # le joueur est carré de côté j_size 0.05
+    j_size = 0.05 # le joueur est carré de côté j_size 0.05
     vitesse = 0.1 / 6
     
     def __init__(self):

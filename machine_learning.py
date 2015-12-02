@@ -17,14 +17,14 @@ import theano
 Jeu = MJ.Jeu(autorepeat=False)
 
 for i in xrange(100000):
-    m='d'
-    i=rd.random()
-    if (i<0.333):
+    m = 'd'
+    i = rd.random()
+    if (i < 0.333):
         m='m'
-    elif (i<0.6666):
+    elif (i < 0.6666):
         m='q'
-    s=Jeu.update_all(m)
-    if not(s=="Dead"):
+    s = Jeu.update_all(m)
+    if not(s == "Dead"):
         print s
     else:
         Jeu.restart()
