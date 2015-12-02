@@ -31,18 +31,18 @@ class Jeu(Tk):
     
     delta_t = 25 # Durée d'une frame, en ms
     
-    def __init__(self, autorepeat=True,display=True):
+    def __init__(self, autorepeat=True, display=True):
         Tk.__init__(self)
         print "Jeu créé"
         self.joueur = SI.Joueur()
         self.mechants = []
-        for i in xrange(10):
+        for i in xrange(39):
             self.mechants.append(SI.Mechant())
         self.temps = 0
         self.missiles = []
         self.score = 0
-        self.display=display
-        self.instruction='m'
+        self.display = display
+        self.instruction = 'm'
         self.dead_screen = False
         self.frame = Frame(self, width=T, height=T)
         self.canvas = Canvas(self, width=T, height=T, bg="black")
@@ -50,9 +50,9 @@ class Jeu(Tk):
         self.canvas.create_text(T-50, T-50, text="Vies : "+str(self.joueur.vies), fill="white", tag="vie")
         self.canvas.create_text(100, T-50, text="Temps (score) : "+str(self.temps) + " ("+str(self.score) + ")", fill="white", tag="score")
         self.autorepeat = autorepeat
-        self.update_all()        
+        self.update_all()
         
-    def restart(self):
+    def restart(self, n=0):
         #print "Restart"
         self.joueur.reinitialiser()
         self.mechants = []
@@ -68,6 +68,9 @@ class Jeu(Tk):
         self.canvas.itemconfigure("vie", text="Vies : "+str(self.joueur.vies))
         self.canvas.itemconfigure("score", text="Temps (score) : "+str(self.temps) + " ("+str(self.score) + ")", fill="white")
         self.canvas.delete("dead")
+        if n:
+            for s in xrange(n):
+                self.update_all('m')
     
         
     def implement_action(self):
@@ -81,16 +84,15 @@ class Jeu(Tk):
             self.missiles.append(SI.Missile(self.joueur.position, direction=1))
                 
     def update_all(self,instruction='m'):
-        self.instruction=instruction
+        self.instruction = instruction
         self.temps += 1
         if not(self.joueur.alive):
             return "Dead"
         if self.display:
             self.afficher()
-        #print len(self.missiles)
         self.implement_action()
         r = rd.random()
-        if (r < 0.04 and len(self.mechants)<40):
+        if len(self.mechants)<40 and (r < 0.04) :
             self.mechants.append(SI.Mechant())
         mechants_to_delete = []
         missiles_to_delete = []
@@ -104,14 +106,14 @@ class Jeu(Tk):
         for i, mechant in enumerate(self.mechants):
             mechant.bouger(Jeu.delta_t)
             r = rd.random()
-            if (r<0.04 and len(self.missiles)<100):
+            if (r<0.015 and len(self.missiles)<100):
                 self.missiles.append(SI.Missile(mechant.position, direction=-1))
             for j, missile in enumerate(self.missiles):
                 if missile.detecter_collision_mechant(mechant):
                     self.score += 1
-                    if not(appartient(mechants_to_delete,i)):
+                    if not(appartient(mechants_to_delete, i)):
                         mechants_to_delete = [i] + mechants_to_delete
-                    if not(appartient(missiles_to_delete,j)):
+                    if not(appartient(missiles_to_delete, j)):
                         missiles_to_delete = [j] + missiles_to_delete
         for elt in mechants_to_delete:
             self.mechants.pop(elt)
@@ -121,24 +123,6 @@ class Jeu(Tk):
             self.canvas.after(Jeu.delta_t, self.update_all)
         #else:
             #return self.temps,self.joueur.vies,self.get_image()
-    
-    
-    def get_image(self):
-        nx = 40
-        ny = 40
-        tab = np.zeros((nx, ny))
-        x, y = self.joueur.position
-        for elt in self.missiles:
-            x_m, y_m = elt.position
-            x_p = x_m - (x - 0.5) 
-            if (y_m < 0.5):
-                tab[int(nx*x_p) % nx, int(ny*y_m)] = 1
-        x = 0.5 * nx
-        y = y * ny
-        for i in xrange(5):
-            for j in xrange(5):
-                tab[x+i-5, y+j-5] = -1
-        return tab
     
     
     

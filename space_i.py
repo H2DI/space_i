@@ -38,18 +38,12 @@ class Mechant:
         self.position = x + vx * delta_t / 50, y + vy * delta_t / 50
         return
     
-    def tirer(self):
-        Missile(self.position, direction=-1)
-        return
-    
-    def afficher(self):
-        return
-            
+   
 
 class Joueur:
     
     j_size = 0.05 # le joueur est carré de côté j_size 0.05
-    vitesse = 0.1 / 6
+    vitesse = 0.2 / 6
     
     def __init__(self):
         self.position = 0.5, 0.1
@@ -80,7 +74,7 @@ class Joueur:
 class Missile:
     
     v_missile = 0.1 / 6
-    missile_size = 0.01
+    missile_size = 0.02
     
     def __init__(self, position, direction=1):
         self.position = position
@@ -102,9 +96,6 @@ class Missile:
                 print "Méchant tué en : " + str((x, y, x_mis, y_mis))
                 return True
     
-    def tirer(self):
-        Missile(self.position, direction=1)
-        return
     
     def bouger(self, delta_t):
          x, y = self.position

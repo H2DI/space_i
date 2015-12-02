@@ -16,7 +16,7 @@ temps_total = []
 t = 0
 
 while t < 1000:
-    for s in range(80):
+    for s in range(60):
         jeu.update_all('m')
     while(True):
         r = rd.random()
