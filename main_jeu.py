@@ -53,7 +53,7 @@ class Jeu(Tk):
         self.update_all()        
         
     def restart(self):
-        print "Restart"
+        #print "Restart"
         self.joueur.reinitialiser()
         self.mechants = []
         for i in xrange(10):
