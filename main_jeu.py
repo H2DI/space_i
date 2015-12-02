@@ -124,19 +124,20 @@ class Jeu(Tk):
     
     
     def get_image(self):
-        nx=40
-        ny=40
+        nx = 40
+        ny = 40
         tab = np.zeros((nx, ny))
+        x, y = self.joueur.position
         for elt in self.missiles:
-            x, y = elt.position
-            if (y<0.5):
-                tab[int(nx*x),int(ny*y)] = 1
-        x,y=self.joueur.position
-        x=x*nx
-        y=y*ny
+            x_m, y_m = elt.position
+            x_p = x_m - (x - 0.5) 
+            if (y_m < 0.5):
+                tab[int(nx*x_p) % nx, int(ny*y_m)] = 1
+        x = 0.5 * nx
+        y = y * ny
         for i in xrange(5):
             for j in xrange(5):
-                tab[x+i-5,y+j-5]=-1
+                tab[x+i-5, y+j-5] = -1
         return tab
     
     

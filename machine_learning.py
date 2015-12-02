@@ -23,7 +23,7 @@ ny=40
 
 n_coups=6
 
-jeu = MJ.Jeu(autorepeat=False, display=False)
+jeu = MJ.Jeu(autorepeat=False, display=True)
 
 nn = pickle.load(open('nn.pkl', 'rb'))
 
@@ -31,7 +31,6 @@ nn = pickle.load(open('nn.pkl', 'rb'))
 #nn = Regressor(layers=[Layer("Sigmoid", units=(1600+n_coups)),Layer("Sigmoid",units=500), Layer("Sigmoid")], learning_rate=0.05, n_iter=10)
 
 
-#nn.set_params(t)
 
 def good_shape(jeu, instructions):#instructions est un tableau de 0 et 1 à 7 éléments
     tab = np.zeros((1, (1600+n_coups)))
@@ -104,8 +103,8 @@ for s in xrange(num_iter):
 
 
 pickle.dump(nn, open('nn.pkl', 'wb'))
+print "Saved"
 
-#np.save("/Users/Maxime/space_i/apprentissage.npy", t)
 
 
 
