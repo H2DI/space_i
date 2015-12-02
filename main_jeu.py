@@ -12,8 +12,8 @@ from Tkinter import *
 
 import random as rd
 from math import sqrt
-
 import space_i as SI
+import numpy as np
 
 
 T = 600 # Taille de la fenêtre
@@ -31,14 +31,17 @@ class Jeu(Tk):
     
     delta_t = 25 # Durée d'une frame, en ms
     
-    def __init__(self, autorepeat=True):
+    def __init__(self, autorepeat=True,display=True):
         Tk.__init__(self)
         print "Jeu créé"
         self.joueur = SI.Joueur()
         self.mechants = []
+        for i in xrange(10):
+            self.mechants.append(SI.Mechant())
         self.temps = 0
         self.missiles = []
         self.score = 0
+        self.display=display
         self.instruction='m'
         self.dead_screen = False
         self.frame = Frame(self, width=T, height=T)
@@ -53,6 +56,8 @@ class Jeu(Tk):
         print "Restart"
         self.joueur.reinitialiser()
         self.mechants = []
+        for i in xrange(10):
+            self.mechants.append(SI.Mechant())
         self.missiles = []
         self.score = 0
         self.temps = 0
@@ -78,14 +83,14 @@ class Jeu(Tk):
     def update_all(self,instruction='m'):
         self.instruction=instruction
         self.temps += 1
-        self.canvas.itemconfigure("score", text="Temps (score) : "+str(self.temps / 10) + " ("+str(self.score) + ")")
         if not(self.joueur.alive):
             return "Dead"
-        self.afficher()
+        if self.display:
+            self.afficher()
         #print len(self.missiles)
         self.implement_action()
         r = rd.random()
-        if (r < 0.04 and len(self.mechants)<100):
+        if (r < 0.04 and len(self.mechants)<40):
             self.mechants.append(SI.Mechant())
         mechants_to_delete = []
         missiles_to_delete = []
@@ -95,12 +100,11 @@ class Jeu(Tk):
                 missiles_to_delete.append(j)
             elif missile.detecter_collision_joueur(self.joueur):
                 self.joueur.touched()
-                self.canvas.itemconfigure("vie", text="Vies : "+str(self.joueur.vies))
                 missiles_to_delete.append(j)
         for i, mechant in enumerate(self.mechants):
             mechant.bouger(Jeu.delta_t)
             r = rd.random()
-            if ((r<0.01*(1+sqrt(sqrt((self.temps/1000))))) and len(self.missiles)<100):
+            if (r<0.04 and len(self.missiles)<100):
                 self.missiles.append(SI.Missile(mechant.position, direction=-1))
             for j, missile in enumerate(self.missiles):
                 if missile.detecter_collision_mechant(mechant):
@@ -113,13 +117,31 @@ class Jeu(Tk):
             self.mechants.pop(elt)
         for elt in missiles_to_delete:
             self.missiles.pop(elt)
-        print self.autorepeat
         if self.autorepeat:
-            print self.autorepeat
-            print Jeu.delta_t
             self.canvas.after(Jeu.delta_t, self.update_all)
-        else:
-            return self.joueur, self.mechants, self.missiles, self.joueur.vies, self.temps
+        #else:
+            #return self.temps,self.joueur.vies,self.get_image()
+    
+    
+    def get_image(self):
+        nx=40
+        ny=40
+        tab = np.zeros((nx, ny))
+        for elt in self.missiles:
+            x, y = elt.position
+            if (y<0.5):
+                tab[int(nx*x),int(ny*y)] = 1
+        x,y=self.joueur.position
+        x=x*nx
+        y=y*ny
+        for i in xrange(5):
+            for j in xrange(5):
+                tab[x+i-5,y+j-5]=-1
+        return tab
+    
+    
+    
+    
     
     def afficher(self):
         if not(self.joueur.alive):
@@ -131,6 +153,8 @@ class Jeu(Tk):
                 self.canvas.tag_bind('dead', '<Button-1>', self.restart)
                 self.canvas.pack()
         else:
+            self.canvas.itemconfigure("score", text="Temps (score) : "+str(self.temps / 10) + " ("+str(self.score) + ")")
+            self.canvas.itemconfigure("vie", text="Vies : "+str(self.joueur.vies))
             self.canvas.delete("missiles")
             self.canvas.delete("mechants")
             self.canvas.delete("joueur")
