@@ -32,7 +32,7 @@ class Mechant:
     def bouger(self , delta_t): # change la vitesse si au bord
         x, y = self.position
         vx, vy = self.vitesse
-        if x < Mechant.m_size / 2 or x > 1 - Mechant.m_size / 2:
+        if x < 0. or x > 1.:
             self.vitesse = -vx, vy
         vx, vy = self.vitesse
         self.position = x + vx * delta_t / 50, y + vy * delta_t / 50
@@ -65,10 +65,10 @@ class Joueur:
         x, y = self.position
         if -Joueur.j_size / 2 < x < 1 + Joueur.j_size / 2:
             self.position = x + i * Joueur.vitesse * delta_t / 50, y
-        elif -Joueur.j_size / 2 > x:
-            self.position = 1., y
-        elif x > 1 + Joueur.j_size / 2:  
-            self.position = 0, y
+        elif x <= -Joueur.j_size / 2 :
+            self.position = 1. - Joueur.j_size/2, y
+        elif 1. + Joueur.j_size / 2 <= x:  
+            self.position = Joueur.j_size/2, y
 
     def touched(self):
         if self.vies > 0:

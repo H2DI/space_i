@@ -12,17 +12,19 @@ from Tkinter import *
 import main_jeu as MJ
 import numpy as np
 import random as rd
+
+from sknn.platform import gpu32
+
 from sknn.mlp import Regressor, Layer
 from sknn.backend import lasagne
 import pickle
 
-from sknn.platform import gpu32
 
 
-nx=40
-ny=40
+nx = 40
+ny = 40
 
-n_coups=6
+n_coups = 6
 
 jeu = MJ.Jeu(autorepeat=False, display=False)
 
@@ -84,7 +86,7 @@ for s in xrange(num_iter):
 #print predicted_outcome
     i = np.argmax(predicted_outcome)
     r = rd.random()
-    if (r < 0.2- 0.2*(s/float(num_iter))):
+    if (r < 0.5):
         i = int(rd.random() * 2**(n_coups))
     outcome = 1
     for elt in possibilities[i]:
