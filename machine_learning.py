@@ -31,8 +31,6 @@ def generate(n):
     return result
     
     
-
-    
 class Learn:
     
     nx = 20
