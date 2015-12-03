@@ -45,7 +45,7 @@ class Learn:
         self.jeu.restart(Learn.coups_sautes)
         self.image = self.get_image()
         if new:
-            self.nn = Regressor(layers=[Layer("Linear", units=(Learn.n_cell+Learn.n_coups)),Layer("Sigmoid", units=800), Layer("Softmax")], learning_rate=0.1, n_iter=1)
+            self.nn = Regressor(layers=[Layer("Linear", units=(Learn.n_cell+Learn.n_coups)),Layer("Sigmoid", units=800), Layer("Sigmoid")], learning_rate=0.1, n_iter=1)
             self.nn.fit(self.good_shape(self.image, self.possibilities[Learn.n_coups/2 - 1]), np.array([[0]]))
         else:
             self.nn = pickle.load(open('nn.pkl', 'rb'))
@@ -171,16 +171,16 @@ class Learn:
         self.jeu.restart(Learn.coups_sautes)
         self.image = self.get_image()
 
-    def save_rd_train_set(self, num_iter=10000, overwrite=False, train_file=None): # returns a set of situations, choice sequences, and outcomes
+    def save_rd_train_set(self, num_iter=20000, overwrite=False, train_file=None): # returns a set of situations, choice sequences, and outcomes
         self.jeu.restart(Learn.coups_sautes)        
         if train_file:
             train_set = pickle.load(open(train_file, "rb" ))
         else:
-            train_set = pickle.load(open( "train_set.csv", "rb" ))
+            train_set = pickle.load(open("/Users/Maxime/space_i/train_set.csv", "rb" ))
         if overwrite:
             train_set = []
         for i in xrange(num_iter):
-            im = self.image
+            im = self.get_image()
             choice = self.possibilities[rd.randint(0, 2**Learn.n_coups-1)]
             outcome = 1
             for elt in choice:
@@ -193,21 +193,35 @@ class Learn:
                         outcome = 0
                         self.jeu.restart(Learn.coups_sautes)
             train_set.append((im, choice, outcome))
-        pickle.dump(train_set, open("train_set.csv", "wb"))
         if train_file:
             pickle.dump(train_set, open(train_file, "wb"))
         else:
-            pickle.dump(train_set, open("train_set.csv", "wb"))
+            pickle.dump(train_set, open("/Users/Maxime/space_i/train_set.csv", "wb"))
         return
 
     def intensive_train(self, train_file=None): # trainfile is a string
         if train_file:
             train_set = pickle.load(open(train_file, "rb"))
         else:
-            train_set = pickle.load(open("train_set.csv", "rb" ))
+            train_set = pickle.load(open("/Users/Maxime/space_i/train_set.csv", "rb" ))
         for training in train_set:
             im, choice, outcome = training
-            self.nn.fit(self.good_shape(image, choice), np.array([[outcome]]))
+            self.nn.fit(self.good_shape(im, choice), np.array([[outcome]]))
+            
+    def error_on_train_set(self):
+        train_set = pickle.load(open("/Users/Maxime/space_i/train_set.csv", "rb" ))
+        error = 0.
+        for training in train_set:
+            im, choice, outcome=training
+            s = self.nn.predict(self.good_shape(im,choice))
+            error += (s[0][0]-outcome)*(s[0][0]-outcome)
+        error = error / len(train_set)
+        return error
         
-learn = Learn(new=True, display=True)
-#learn.learn(num_iter=10000, disp_mean_t=False)
+a = Learn(new=True, display=False)
+a.save_rd_train_set(num_iter=100,overwrite=True)
+for i in xrange(100):
+    print "training no " +  str(i)
+    print a.error_on_train_set()
+    a.intensive_train()
+
