@@ -217,13 +217,13 @@ class Learn:
             
             
         
-a = Learn(new=True, display=False)
+a = Learn(new=False, display=True)
 
 for i in xrange(100):
     print "training no " +  str(i)
-    a.save_rd_train_set(num_iter=5000, overwrite=True)
-    #a.play(num_iter=1000)
-    print "auc : " + str(a.auc_on_train_set())
-    for j in range(10):
-        a.intensive_train()
+    #a.save_rd_train_set(num_iter=5000, overwrite=True)
+    a.play(num_iter=1000)
+    #print "auc : " + str(a.auc_on_train_set())
+    #for j in range(10):
+        #a.intensive_train()
 
