@@ -45,7 +45,7 @@ class Learn:
         self.jeu.restart(Learn.coups_sautes)
         self.image = self.get_image()
         if new:
-            self.nn = Regressor(layers=[Layer("Linear", units=(Learn.n_cell+Learn.n_coups)),Layer("Sigmoid", units=800), Layer("Sigmoid")], learning_rate=0.1, n_iter=1)
+            self.nn = Regressor(layers=[Layer("Linear", units=(Learn.n_cell+Learn.n_coups)),Layer("Sigmoid", units=800), Layer("Sigmoid")], learning_rate=0.02, n_iter=1)
             self.nn.fit(self.good_shape(self.image, self.possibilities[Learn.n_coups/2 - 1]), np.array([[0]]))
         else:
             self.nn = pickle.load(open('nn.pkl', 'rb'))
@@ -58,16 +58,14 @@ class Learn:
         return 10 * tab
 
 
-    def learn(self, num_iter=1000, disp_mean_t=False, print_auc=False):
+    def learn(self, num_iter=1000, print_auc=False):
         predicted_outcome = np.zeros(2**Learn.n_coups)
-        t = 0.
-        n_morts = 0
         for s in xrange(num_iter):
             if (s%100 == 0):
                 print s
             outcome = 1
             for i, elt in enumerate(self.possibilities):
-                predicted_outcome[i] = self.nn.predict(self.good_shape(self.image, elt))
+                predicted_outcome[i] = self.nn.predict(self.good_shape(self.image, elt))[0][0]
             #print predicted_outcome
             i = np.argmax(predicted_outcome)
             r = rd.random()
@@ -75,16 +73,12 @@ class Learn:
                 i = int(rd.random() * 2**(Learn.n_coups))
             for elt in self.possibilities[i]:
                 if (outcome == 1):
-                    if elt:
+                    if elt == 1:
                         instr = 'd'
-                    else:
+                    elif elt == 0:
                         instr = 'q'
                     if (self.jeu.update_all(instr) == "Dead"):
                         outcome = 0
-                        n_morts += 1
-                        if disp_mean_t:
-                            t =  (t * (n_morts - 1) + self.jeu.temps) / n_morts
-                            print t, self.jeu.temps
                         self.jeu.restart(Learn.coups_sautes)
             self.image = self.get_image()
             tab = self.good_shape(self.image, self.possibilities[i])
@@ -214,14 +208,29 @@ class Learn:
         for training in train_set:
             im, choice, outcome=training
             s = self.nn.predict(self.good_shape(im,choice))
-            error += (s[0][0]-outcome)*(s[0][0]-outcome)
+            #print s[0][0], outcome
+            error += abs(s[0][0]-outcome)
         error = error / len(train_set)
         return error
         
-a = Learn(new=True, display=False)
-a.save_rd_train_set(num_iter=100,overwrite=True)
+    def auc_on_train_set(self):
+        train_set = pickle.load(open("/Users/Maxime/space_i/train_set.csv", "rb" ))
+        real_outputs = []
+        predicted_outputs = []
+        for training in train_set:
+            im, choice, outcome = training
+            predicted_outputs.append(self.nn.predict(self.good_shape(im, choice))[0])
+            real_outputs.append(outcome)
+        fpr, tpr, thresholds = metrics.roc_curve(real_outputs, predicted_outputs)
+        return metrics.auc(fpr, tpr)
+            
+            
+        
+a = Learn(new=True, display=True)
+#a.save_rd_train_set(num_iter=1000, overwrite=True)
 for i in xrange(100):
     print "training no " +  str(i)
-    print a.error_on_train_set()
-    a.intensive_train()
+    print a.learn(num_iter=500)
+    print "auc : " + str(a.auc_on_train_set())
+    #a.intensive_train()
 
