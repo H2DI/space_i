@@ -35,24 +35,24 @@ class Learn:
     nx = 20
     ny = 20
     n_cell = nx * ny
-    n_coups = 5
+    n_coups = 6
     coups_sautes = 60
 
     def __init__(self, new=False, display=False):
         self.possibilities = generate(Learn.n_coups)
-        self.explore = 0.8
+        self.explore = 0.
         self.jeu = MJ.Jeu(autorepeat=False, display=display)
         self.jeu.restart(Learn.coups_sautes)
         self.image = self.get_image()
         if new:
-            self.nn = Regressor(layers=[Layer("Linear", units=(Learn.n_cell+Learn.n_coups)),Layer("Sigmoid", units=800), Layer("Sigmoid")], learning_rate=0.02, n_iter=1)
+            self.nn = Regressor(layers=[Layer("Linear", units=(Learn.n_cell+Learn.n_coups)), Layer("Sigmoid", units=800), Layer("Sigmoid")], learning_rate=0.01, n_iter=1)
             self.nn.fit(self.good_shape(self.image, self.possibilities[Learn.n_coups/2 - 1]), np.array([[0]]))
         else:
             self.nn = pickle.load(open('nn.pkl', 'rb'))
             self.nn.fit(self.good_shape(self.image, self.possibilities[Learn.n_coups/2 - 1]), np.array([[1]]))
 
 
-    def good_shape(self, image, instructions):#instructions est un tableau de 0 et 1 à 7 éléments
+    def good_shape(self, image, instructions):#instructions est un tableau de 0 et 1 à n_coups éléments
         tab = np.zeros((1, (Learn.n_cell + Learn.n_coups)))
         tab[0, ::] = np.append(image.flatten(), instructions)
         return 10 * tab
@@ -61,6 +61,7 @@ class Learn:
     def learn(self, num_iter=1000, print_auc=False):
         predicted_outcome = np.zeros(2**Learn.n_coups)
         for s in xrange(num_iter):
+            self.image = self.get_image()
             if (s%100 == 0):
                 print s
             outcome = 1
@@ -80,7 +81,6 @@ class Learn:
                     if (self.jeu.update_all(instr) == "Dead"):
                         outcome = 0
                         self.jeu.restart(Learn.coups_sautes)
-            self.image = self.get_image()
             tab = self.good_shape(self.image, self.possibilities[i])
             self.nn.fit(tab, np.array([[outcome]]))
             if (s % 1000 == 0):
@@ -174,6 +174,7 @@ class Learn:
         if overwrite:
             train_set = []
         for i in xrange(num_iter):
+            self.jeu.restart(100)
             im = self.get_image()
             choice = self.possibilities[rd.randint(0, 2**Learn.n_coups-1)]
             outcome = 1
@@ -185,14 +186,14 @@ class Learn:
                         instr = 'q'
                     if (self.jeu.update_all(instr) == "Dead"):
                         outcome = 0
-                        self.jeu.restart(Learn.coups_sautes)
             train_set.append((im, choice, outcome))
         if train_file:
             pickle.dump(train_set, open(train_file, "wb"))
         else:
+            print "Dataset créé"
             pickle.dump(train_set, open("/Users/Maxime/space_i/train_set.csv", "wb"))
         return
-
+        
     def intensive_train(self, train_file=None): # trainfile is a string
         if train_file:
             train_set = pickle.load(open(train_file, "rb"))
@@ -201,6 +202,8 @@ class Learn:
         for training in train_set:
             im, choice, outcome = training
             self.nn.fit(self.good_shape(im, choice), np.array([[outcome]]))
+        pickle.dump(self.nn, open('nn.pkl', 'wb'))
+        print "NN Saved"
             
     def error_on_train_set(self):
         train_set = pickle.load(open("/Users/Maxime/space_i/train_set.csv", "rb" ))
@@ -215,7 +218,7 @@ class Learn:
         
     def auc_on_train_set(self):
         train_set = pickle.load(open("/Users/Maxime/space_i/train_set.csv", "rb" ))
-        real_outputs = []
+        real_outputs = []    
         predicted_outputs = []
         for training in train_set:
             im, choice, outcome = training
@@ -226,11 +229,14 @@ class Learn:
             
             
         
-a = Learn(new=True, display=True)
-#a.save_rd_train_set(num_iter=1000, overwrite=True)
+a = Learn(new=False, display=False)
+a.save_rd_train_set(num_iter=1000, overwrite=True)
+
 for i in xrange(100):
     print "training no " +  str(i)
-    print a.learn(num_iter=500)
-    print "auc : " + str(a.auc_on_train_set())
-    #a.intensive_train()
+    #a.save_rd_train_set(num_iter=5000, overwrite=True)
+    a.learn(num_iter=1000)
+    #print "auc : " + str(a.auc_on_train_set())
+    #for j in range(10):
+        #a.intensive_train()
 

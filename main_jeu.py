@@ -71,6 +71,8 @@ class Jeu(Tk):
         if n:
             for s in xrange(n):
                 self.update_all('m')
+            if self.joueur.alive == False :
+                self.restart(n=n)
     
         
     def implement_action(self):
