@@ -35,7 +35,7 @@ class Learn:
     nx = 20
     ny = 20
     n_cell = nx * ny
-    n_coups = 6
+    n_coups = 4
     coups_sautes = 60
 
     def __init__(self, new=False, display=False):
@@ -58,7 +58,7 @@ class Learn:
         return 10 * tab
 
 
-    def learn(self, num_iter=1000, print_auc=False):
+    def play(self, num_iter=1000):
         predicted_outcome = np.zeros(2**Learn.n_coups)
         for s in xrange(num_iter):
             self.image = self.get_image()
@@ -67,28 +67,16 @@ class Learn:
             outcome = 1
             for i, elt in enumerate(self.possibilities):
                 predicted_outcome[i] = self.nn.predict(self.good_shape(self.image, elt))[0][0]
-            #print predicted_outcome
             i = np.argmax(predicted_outcome)
-            r = rd.random()
-            if (r < self.explore):
-                i = int(rd.random() * 2**(Learn.n_coups))
-            for elt in self.possibilities[i]:
-                if (outcome == 1):
-                    if elt == 1:
-                        instr = 'd'
-                    elif elt == 0:
-                        instr = 'q'
-                    if (self.jeu.update_all(instr) == "Dead"):
-                        outcome = 0
-                        self.jeu.restart(Learn.coups_sautes)
-            tab = self.good_shape(self.image, self.possibilities[i])
-            self.nn.fit(tab, np.array([[outcome]]))
-            if (s % 1000 == 0):
-                if print_auc:
-                    print  "New auc is : ", learn.auc(num_iter=10000)
-                pickle.dump(self.nn, open('nn.pkl', 'wb'))
-                print "NN Saved"
-        
+            elt = self.possibilities[i][0]
+            if (outcome == 1):
+                if elt == 1:
+                    instr = 'd'
+                elif elt == 0:
+                    instr = 'q'
+                if (self.jeu.update_all(instr) == "Dead"):
+                    outcome = 0
+                    self.jeu.restart(Learn.coups_sautes)        
         
     def auc(self, num_iter=10000):
         real_outputs = []
@@ -229,14 +217,13 @@ class Learn:
             
             
         
-a = Learn(new=False, display=False)
-a.save_rd_train_set(num_iter=1000, overwrite=True)
+a = Learn(new=True, display=False)
 
 for i in xrange(100):
     print "training no " +  str(i)
-    #a.save_rd_train_set(num_iter=5000, overwrite=True)
-    a.learn(num_iter=1000)
-    #print "auc : " + str(a.auc_on_train_set())
-    #for j in range(10):
-        #a.intensive_train()
+    a.save_rd_train_set(num_iter=5000, overwrite=True)
+    #a.play(num_iter=1000)
+    print "auc : " + str(a.auc_on_train_set())
+    for j in range(10):
+        a.intensive_train()
 
