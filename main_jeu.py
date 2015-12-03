@@ -73,7 +73,7 @@ class Jeu(Tk):
                 self.update_all('m')
             if self.joueur.alive == False :
                 self.restart(n=n)
-    
+
         
     def implement_action(self):
         #print self.instruction
@@ -125,9 +125,6 @@ class Jeu(Tk):
             self.canvas.after(Jeu.delta_t, self.update_all)
         #else:
             #return self.temps,self.joueur.vies,self.get_image()
-    
-    
-    
     
     
     def afficher(self):

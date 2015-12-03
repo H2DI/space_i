@@ -30,12 +30,15 @@ def generate(n):
         result[i, ::]  = tab
     return result
     
+    
+
+    
 class Learn:
     
     nx = 20
     ny = 20
     n_cell = nx * ny
-    n_coups = 4
+    n_coups = 8
     coups_sautes = 60
 
     def __init__(self, new=False, display=False):
@@ -50,13 +53,12 @@ class Learn:
         else:
             self.nn = pickle.load(open('nn.pkl', 'rb'))
             self.nn.fit(self.good_shape(self.image, self.possibilities[Learn.n_coups/2 - 1]), np.array([[1]]))
-
+        self.current_data_set = []
 
     def good_shape(self, image, instructions):#instructions est un tableau de 0 et 1 à n_coups éléments
         tab = np.zeros((1, (Learn.n_cell + Learn.n_coups)))
         tab[0, ::] = np.append(image.flatten(), instructions)
         return 10 * tab
-
 
     def play(self, num_iter=1000):
         predicted_outcome = np.zeros(2**Learn.n_coups)
@@ -68,6 +70,7 @@ class Learn:
             for i, elt in enumerate(self.possibilities):
                 predicted_outcome[i] = self.nn.predict(self.good_shape(self.image, elt))[0][0]
             i = np.argmax(predicted_outcome)
+            #print predicted_outcome
             elt = self.possibilities[i][0]
             if (outcome == 1):
                 if elt == 1:
@@ -76,7 +79,8 @@ class Learn:
                     instr = 'q'
                 if (self.jeu.update_all(instr) == "Dead"):
                     outcome = 0
-                    self.jeu.restart(Learn.coups_sautes)        
+                    self.jeu.restart(Learn.coups_sautes)   
+  
         
     def auc(self, num_iter=10000):
         real_outputs = []
@@ -122,7 +126,7 @@ class Learn:
                     self.jeu.restart()
                     break
         self.image = self.get_image()
-        print str(sum(temps_total)*1. / num_iter) + " +/- "+ str(0.96 * np.sqrt(np.var(np.array(temps_total)) / num_iter)  )
+        print str(sum(temps_total)*1. / num_iter) +" +/- "+ str(0.96 * np.sqrt(np.var(np.array(temps_total)) / num_iter)  )
 
 
     def get_image(self):
@@ -136,15 +140,9 @@ class Learn:
                 tab[int(nx_im * x_p) % nx_im, int(ny * y_m)] = 1
         x = 0.5 * nx_im
         y = y * ny
-        #t = " "
         for i in xrange(2):
             for j in xrange(2):
                 tab[x+i-1, y+j-1] = 0
-#        for i in xrange (nx_im / 2):
-#            print t
-#            t = " "
-#            for j in xrange(ny):
-#                t += " " + str(tab[10+i][j])
         return tab[10:30, ::]
 
     def set_display(self, boolean):
@@ -153,14 +151,9 @@ class Learn:
         self.jeu.restart(Learn.coups_sautes)
         self.image = self.get_image()
 
-    def save_rd_train_set(self, num_iter=20000, overwrite=False, train_file=None): # returns a set of situations, choice sequences, and outcomes
+    def save_rd_train_set(self, num_iter=5000): # returns a set of situations, choice sequences, and outcomes
         self.jeu.restart(Learn.coups_sautes)        
-        if train_file:
-            train_set = pickle.load(open(train_file, "rb" ))
-        else:
-            train_set = pickle.load(open("/Users/Maxime/space_i/train_set.csv", "rb" ))
-        if overwrite:
-            train_set = []
+        train_set = []
         for i in xrange(num_iter):
             self.jeu.restart(100)
             im = self.get_image()
@@ -175,40 +168,30 @@ class Learn:
                     if (self.jeu.update_all(instr) == "Dead"):
                         outcome = 0
             train_set.append((im, choice, outcome))
-        if train_file:
-            pickle.dump(train_set, open(train_file, "wb"))
-        else:
-            print "Dataset créé"
-            pickle.dump(train_set, open("/Users/Maxime/space_i/train_set.csv", "wb"))
+        self.current_data_set = train_set
         return
         
-    def intensive_train(self, train_file=None): # trainfile is a string
-        if train_file:
-            train_set = pickle.load(open(train_file, "rb"))
-        else:
-            train_set = pickle.load(open("/Users/Maxime/space_i/train_set.csv", "rb" ))
-        for training in train_set:
+    def intensive_train(self): 
+        for training in self.current_data_set:
             im, choice, outcome = training
             self.nn.fit(self.good_shape(im, choice), np.array([[outcome]]))
+        print "Commence à sauver"
         pickle.dump(self.nn, open('nn.pkl', 'wb'))
         print "NN Saved"
             
     def error_on_train_set(self):
-        train_set = pickle.load(open("/Users/Maxime/space_i/train_set.csv", "rb" ))
         error = 0.
-        for training in train_set:
+        for training in self.current_data_set:
             im, choice, outcome=training
             s = self.nn.predict(self.good_shape(im,choice))
-            #print s[0][0], outcome
             error += abs(s[0][0]-outcome)
         error = error / len(train_set)
         return error
         
     def auc_on_train_set(self):
-        train_set = pickle.load(open("/Users/Maxime/space_i/train_set.csv", "rb" ))
         real_outputs = []    
         predicted_outputs = []
-        for training in train_set:
+        for training in self.current_data_set:
             im, choice, outcome = training
             predicted_outputs.append(self.nn.predict(self.good_shape(im, choice))[0])
             real_outputs.append(outcome)
@@ -216,14 +199,15 @@ class Learn:
         return metrics.auc(fpr, tpr)
             
             
-        
 a = Learn(new=False, display=True)
 
-for i in xrange(100):
-    print "training no " +  str(i)
-    #a.save_rd_train_set(num_iter=5000, overwrite=True)
-    a.play(num_iter=1000)
-    #print "auc : " + str(a.auc_on_train_set())
-    #for j in range(10):
-        #a.intensive_train()
+#a.nn.learning_rate = 0.05
 
+#for i in xrange(100):
+#    print "training no " + str(i)
+#    a.save_rd_train_set(num_iter=5000)
+#    print "auc : " + str(a.auc_on_train_set())
+#    for j in range(10):
+#        a.intensive_train()
+
+a.play(num_iter=100000)
