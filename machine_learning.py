@@ -35,7 +35,7 @@ class Learn:
     nx = 20
     ny = 20
     n_cell = nx * ny
-    n_coups = 6
+    n_coups = 8
     coups_sautes = 60
 
     def __init__(self, new=False, display=False):
@@ -138,17 +138,12 @@ class Learn:
         nx_im, ny = 2 * Learn.nx, Learn.ny
         tab = np.ones((nx_im, ny))/2.
         x, y = self.jeu.joueur.position
-        x = 0.5 * nx_im
-        y = y * ny
-        for i in xrange(2):
-            for j in xrange(2):
-                tab[x+i-1, y+j-1] = 0
         x,y=self.jeu.joueur.position
         for elt in self.jeu.missiles:
             x_m, y_m = elt.position
             x_p = x_m - (x - 0.5) 
             if (y_m < 0.5):
-                tab[int(nx_im * x_p) % nx_im, int(ny * y_m)] = 1
+                tab[int(nx_im * x_p) % nx_im, int(ny * y_m)] = -1
 
         return tab[10:30, ::]
 
@@ -207,17 +202,17 @@ class Learn:
         return metrics.auc(fpr, tpr)
             
             
-a = Learn(new=False,display=False)
+a = Learn(new=True,display=False)
 
-a.nn.learning_rate = 0.001
+a.nn.learning_rate = 0.005
 
 #
-for i in xrange(100):
-    print "training no " + str(i)
-    a.save_rd_train_set(num_iter=5000)
-    print "auc : " + str(a.auc_on_train_set())
-    for j in range(5):
-        a.intensive_train()
+#for i in xrange(100):
+#    print "training no " + str(i)
+#    a.save_rd_train_set(num_iter=5000)
+#    print "auc : " + str(a.auc_on_train_set())
+#    for j in range(5):
+#        a.intensive_train()
 
 
 
