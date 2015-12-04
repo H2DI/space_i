@@ -7,12 +7,11 @@ Space invader
 @author: h
 
 """
-
+from sknn.platform import cpu64
 from Tkinter import *
 import main_jeu as MJ
 import numpy as np
 import random as rd
-
 from sklearn import metrics
 from sknn.mlp import Regressor, Layer
 from sknn.backend import lasagne
@@ -36,17 +35,18 @@ class Learn:
     nx = 20
     ny = 20
     n_cell = nx * ny
-    n_coups = 7
+    n_coups = 6
     coups_sautes = 60
 
     def __init__(self, new=False, display=False):
         self.possibilities = generate(Learn.n_coups)
+        np.random.shuffle(self.possibilities)
         self.explore = 0.
         self.jeu = MJ.Jeu(autorepeat=False, display=display)
         self.jeu.restart(Learn.coups_sautes)
         self.image = self.get_image()
         if new:
-            self.nn = Regressor(layers=[Layer("Linear", units=(Learn.n_cell+Learn.n_coups)), Layer("Sigmoid", units=800), Layer("Sigmoid")], learning_rate=0.01, n_iter=1)
+            self.nn = Regressor(layers=[Layer("Linear", units=(Learn.n_cell+Learn.n_coups)), Layer("Sigmoid", units=1000), Layer("Sigmoid")], learning_rate=0.01, n_iter=1)
             self.nn.fit(self.good_shape(self.image, self.possibilities[Learn.n_coups/2 - 1]), np.array([[0]]))
         else:
             self.nn = pickle.load(open('nn.pkl', 'rb'))
@@ -66,10 +66,16 @@ class Learn:
             if (s%100 == 0):
                 print s
             outcome = 1
-            for i, elt in enumerate(self.possibilities):
-                predicted_outcome[i] = self.nn.predict(self.good_shape(self.image, elt))[0][0]
-            i = np.argmax(predicted_outcome)
-            #print predicted_outcome
+            indice_max=0
+            for j, elt in enumerate(self.possibilities):
+                a = self.nn.predict(self.good_shape(self.image, elt))[0][0]
+                predicted_outcome[j] = a
+                if a>0.99:
+                    i=j
+                    break
+                elif (a>predicted_outcome[indice_max]):
+                    indice_max=j
+            i=indice_max
             elt = self.possibilities[i][0]
             if (outcome == 1):
                 if elt == 1:
@@ -132,16 +138,18 @@ class Learn:
         nx_im, ny = 2 * Learn.nx, Learn.ny
         tab = np.ones((nx_im, ny))/2.
         x, y = self.jeu.joueur.position
-        for elt in self.jeu.missiles:
-            x_m, y_m = elt.position
-            x_p = x_m - (x - 0.5) 
-            if (y_m < 0.5):
-                tab[int(nx_im * x_p) % nx_im, int(ny * y_m)] = 1
         x = 0.5 * nx_im
         y = y * ny
         for i in xrange(2):
             for j in xrange(2):
                 tab[x+i-1, y+j-1] = 0
+        x,y=self.jeu.joueur.position
+        for elt in self.jeu.missiles:
+            x_m, y_m = elt.position
+            x_p = x_m - (x - 0.5) 
+            if (y_m < 0.5):
+                tab[int(nx_im * x_p) % nx_im, int(ny * y_m)] = 1
+
         return tab[10:30, ::]
 
     def set_display(self, boolean):
@@ -154,7 +162,7 @@ class Learn:
         #self.jeu.rand_init(40)
         train_set = []
         for i in xrange(num_iter):
-            self.jeu.rand_init(30)
+            self.jeu.restart(100)
             im = self.get_image()
             choice = self.possibilities[rd.randint(0, 2**Learn.n_coups-1)]
             outcome = 1
@@ -199,18 +207,18 @@ class Learn:
         return metrics.auc(fpr, tpr)
             
             
-a = Learn(display=False)
+a = Learn(new=False,display=False)
 
-#a.nn.learning_rate = 0.0005
+a.nn.learning_rate = 0.001
 
-
+#
 for i in xrange(100):
     print "training no " + str(i)
-    a.save_rd_train_set(num_iter=3000)
+    a.save_rd_train_set(num_iter=5000)
     print "auc : " + str(a.auc_on_train_set())
-    for j in range(10):
+    for j in range(5):
         a.intensive_train()
-    if i==20:
-        a.nn.learning_rate /= 2
 
-#a.play(num_iter=100000)
+
+
+a.play(num_iter=100000)

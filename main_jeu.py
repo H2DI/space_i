@@ -110,7 +110,7 @@ class Jeu(Tk):
         for i, mechant in enumerate(self.mechants):
             mechant.bouger(Jeu.delta_t)
             r = rd.random()
-            if (r<0.015 and len(self.missiles)<100):
+            if (r<0.02 and len(self.missiles)<100):
                 self.missiles.append(SI.Missile(mechant.position, direction=-1))
             for j, missile in enumerate(self.missiles):
                 if missile.detecter_collision_mechant(mechant):
