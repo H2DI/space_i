@@ -36,7 +36,7 @@ class Learn:
     nx = 20
     ny = 20
     n_cell = nx * ny
-    n_coups = 8
+    n_coups = 7
     coups_sautes = 60
 
     def __init__(self, new=False, display=False):
@@ -59,6 +59,7 @@ class Learn:
         return 10 * tab
 
     def play(self, num_iter=1000):
+        self.set_display(True)
         predicted_outcome = np.zeros(2**Learn.n_coups)
         for s in xrange(num_iter):
             self.image = self.get_image()
@@ -150,13 +151,14 @@ class Learn:
         self.image = self.get_image()
 
     def save_rd_train_set(self, num_iter=5000): # returns a set of situations, choice sequences, and outcomes
-        self.jeu.restart(Learn.coups_sautes)        
+        #self.jeu.rand_init(40)
         train_set = []
         for i in xrange(num_iter):
-            self.jeu.restart(100)
+            self.jeu.rand_init(30)
             im = self.get_image()
             choice = self.possibilities[rd.randint(0, 2**Learn.n_coups-1)]
             outcome = 1
+            #print [b.position for b in self.jeu.missiles]
             for elt in choice:
                 if (outcome == 1):
                     if elt:
@@ -197,15 +199,18 @@ class Learn:
         return metrics.auc(fpr, tpr)
             
             
-a = Learn(new=False, display=True)
+a = Learn(display=False)
 
-#a.nn.learning_rate = 0.05
+#a.nn.learning_rate = 0.0005
 
-#for i in xrange(100):
-#    print "training no " + str(i)
-#    a.save_rd_train_set(num_iter=5000)
-#    print "auc : " + str(a.auc_on_train_set())
-#    for j in range(10):
-#        a.intensive_train()
 
-a.play(num_iter=100000)
+for i in xrange(100):
+    print "training no " + str(i)
+    a.save_rd_train_set(num_iter=3000)
+    print "auc : " + str(a.auc_on_train_set())
+    for j in range(10):
+        a.intensive_train()
+    if i==20:
+        a.nn.learning_rate /= 2
+
+#a.play(num_iter=100000)

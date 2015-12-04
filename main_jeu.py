@@ -68,7 +68,7 @@ class Jeu(Tk):
         self.canvas.itemconfigure("vie", text="Vies : "+str(self.joueur.vies))
         self.canvas.itemconfigure("score", text="Temps (score) : "+str(self.temps) + " ("+str(self.score) + ")", fill="white")
         self.canvas.delete("dead")
-        if n:
+        if n>0:
             for s in xrange(n):
                 self.update_all('m')
             if self.joueur.alive == False :
@@ -104,7 +104,9 @@ class Jeu(Tk):
                 missiles_to_delete.append(j)
             elif missile.detecter_collision_joueur(self.joueur):
                 self.joueur.touched()
-                missiles_to_delete.append(j)
+                #missiles_to_delete.append(j)
+                if not(appartient(missiles_to_delete, j)):
+                        missiles_to_delete = [j] + missiles_to_delete
         for i, mechant in enumerate(self.mechants):
             mechant.bouger(Jeu.delta_t)
             r = rd.random()
@@ -123,8 +125,6 @@ class Jeu(Tk):
             self.missiles.pop(elt)
         if self.autorepeat:
             self.canvas.after(Jeu.delta_t, self.update_all)
-        #else:
-            #return self.temps,self.joueur.vies,self.get_image()
     
     
     def afficher(self):
@@ -151,20 +151,29 @@ class Jeu(Tk):
         return
         
     def afficher_mechant(self, mechant):
-        (x,y) = convert_coordinates(mechant.position)
+        x, y = convert_coordinates(mechant.position)
         c = SI.Mechant.m_size * T / 2
         #print (x+c),(y+c),(y-c),(x-c)
         self.canvas.create_rectangle(x+c, y+c, x-c, y-c, fill="red", tag="mechants")
     
     def afficher_missile(self, missile):
-        (x,y) = convert_coordinates(missile.position)
+        x, y = convert_coordinates(missile.position)
         c = SI.Missile.missile_size * T / 2
         self.canvas.create_rectangle(x+c, y+c, x-c, y-c, fill="yellow", tag="missiles")
         
     def afficher_joueur(self, joueur):
-        (x,y) = convert_coordinates(joueur.position)
+        x, y = convert_coordinates(joueur.position)
         c = SI.Joueur.j_size * T / 2
         #print (x+c),(y+c),(y-c),(x-c)
         self.canvas.create_rectangle(x+c, y+c, x-c, y-c, fill="white", tag="joueur")
-
+        
+        
+    def rand_init(self, n_miss):
+        self.restart()
+        for i in xrange(n_miss):
+            u, v = rd.uniform(0., 1.), rd.uniform(0.1, 0.5)
+            #x, y = convert_coordinates((u, v))
+            self.missiles.append(SI.Missile((u, v), direction=-1))
+        self.update_all('m')
+            
 #Jeu(autorepeat=True).mainloop()
