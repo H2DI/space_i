@@ -125,23 +125,23 @@ class Learn:
         for training in self.current_data_set:
             im1, im2, im3=training
             s = self.nn.predict(self.good_shape_2(im1, im2))[0]
-            if (rd.random()<0.05):
+            if (rd.random()<0.01):
                 print "Differences : "
-                print abs(s-im3)
+                print np.max(abs(s-im3))
             error += self.dist(s,im3)
         error = error / len(self.current_data_set)
         return error
 
 
 
-a = Learn(new=True)
+a = Learn(new=False)
 
 #a.nn.learning_rate = 0.001
 
 
 for i in xrange(100):
     print "training no " + str(i)
-    a.save_rd_train_set(num_iter=100)
+    a.save_rd_train_set(num_iter=500)
     print "error : " + str(a.error_on_train_set())
     for j in range(5):
         a.intensive_train()
