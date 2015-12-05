@@ -23,7 +23,6 @@ class Learn:
     nx = 20
     ny = 20
     n_cell = nx * ny
-    n_coups = 6
     coups_sautes = 60
     
     #This calculates the distance between two images
@@ -126,6 +125,9 @@ class Learn:
         for training in self.current_data_set:
             im1, im2, im3=training
             s = self.nn.predict(self.good_shape_2(im1, im2))[0]
+            if (rd.random()<0.05):
+                print "Differences : "
+                print abs(s-im3)
             error += self.dist(s,im3)
         error = error / len(self.current_data_set)
         return error
@@ -139,7 +141,7 @@ a = Learn(new=True)
 
 for i in xrange(100):
     print "training no " + str(i)
-    a.save_rd_train_set(num_iter=10)
+    a.save_rd_train_set(num_iter=100)
     print "error : " + str(a.error_on_train_set())
     for j in range(5):
         a.intensive_train()
