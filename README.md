@@ -12,4 +12,4 @@ Avec une méthode comme ça on divise l'apprentissage, c'est un peu supervisé d
 Une autre méthode serait juste de maximiser le score en mettant une pénalité sur notre mort. Je sais pas si ça peut bien marcher avec un simple process gaussien mais on peut tenter. Autrement, faudrait peut être utiliser des réseaux de neurone
 
 
-YEAH C4EST D BAR
+
